@@ -1,18 +1,6 @@
 import "package:flutter/material.dart";
 
-abstract class Controller extends ChangeNotifier {
-  static T ofType<T extends Controller>(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_ControllerModel<T>>()!
-        .controller;
-  }
-
-  static T? maybeOfType<T extends Controller>(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_ControllerModel<T>>()
-        ?.controller;
-  }
-}
+abstract class Controller extends ChangeNotifier {}
 
 class _ControllerModel<T> extends InheritedWidget {
   const _ControllerModel({
@@ -29,29 +17,6 @@ class _ControllerModel<T> extends InheritedWidget {
   }
 }
 
-class ControllerBuilder<T extends Controller> extends StatelessWidget {
-  final T controller;
-
-  final Widget Function(BuildContext context) builder;
-
-  const ControllerBuilder({
-    super.key,
-    required this.controller,
-    required this.builder,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return _ControllerModel<T>(
-      controller: controller,
-      child: ListenableBuilder(
-        listenable: controller,
-        builder: (context, _) => builder(context),
-      ),
-    );
-  }
-}
-
 class ControllerListenable<T extends Controller> extends StatelessWidget {
   final Widget Function(BuildContext context, T controller) builder;
 
@@ -59,7 +24,7 @@ class ControllerListenable<T extends Controller> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Controller.ofType<T>(context);
+    final controller = context.read<T>();
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) => builder(context, controller),
@@ -84,9 +49,6 @@ class ControllerProvider<T extends Controller> extends StatelessWidget {
 }
 
 extension ControllerExtension on BuildContext {
-  T ofType<T extends Controller>() =>
+  T read<T extends Controller>() =>
       getInheritedWidgetOfExactType<_ControllerModel<T>>()!.controller;
-
-  T? maybeOfType<T extends Controller>() =>
-      getInheritedWidgetOfExactType<_ControllerModel<T>>()?.controller;
 }

@@ -68,15 +68,15 @@ class Home extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: ControllerListenable<CounterController>(
-          builder: (context, controller) {
-            return Text('You pressed the button ${controller.count}');
+          builder: (context, counterController) {
+            return Text('You pressed the button ${counterController.count}');
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          final counterController = context.ofType<CounterController>();
+          final counterController = context.read<CounterController>();
           counterController.increment();
         },
       ),
