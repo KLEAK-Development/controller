@@ -40,9 +40,12 @@ class _InjectionState extends State<Injection> {
 
   @override
   Widget build(BuildContext context) {
-    return ControllerProvider(
-      controller: counterController,
-      child: widget.child,
+    return Provider<String>(
+      value: 'France',
+      child: ControllerProvider(
+        controller: counterController,
+        child: widget.child,
+      ),
     );
   }
 }
@@ -65,18 +68,27 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final country = context.read<String>();
+
     return Scaffold(
       body: Center(
-        child: ControllerListenable<CounterController>(
-          builder: (context, counterController) {
-            return Text('You pressed the button ${counterController.count}');
-          },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(country),
+            ControllerListenable<CounterController>(
+              builder: (context, counterController) {
+                return Text(
+                    'You pressed the button ${counterController.count}');
+              },
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          final counterController = context.read<CounterController>();
+          final counterController = context.ofType<CounterController>();
           counterController.increment();
         },
       ),

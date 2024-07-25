@@ -24,7 +24,7 @@ class ControllerListenable<T extends Controller> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.read<T>();
+    final controller = context.ofType<T>();
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) => builder(context, controller),
@@ -49,6 +49,19 @@ class ControllerProvider<T extends Controller> extends StatelessWidget {
 }
 
 extension ControllerExtension on BuildContext {
-  T read<T extends Controller>() =>
+  T ofType<T extends Controller>() =>
       getInheritedWidgetOfExactType<_ControllerModel<T>>()!.controller;
+}
+
+class Provider<T> extends InheritedWidget {
+  final T value;
+
+  const Provider({super.key, required super.child, required this.value});
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
+}
+
+extension ProviderExtension on BuildContext {
+  T read<T>() => getInheritedWidgetOfExactType<Provider<T>>()!.value;
 }
