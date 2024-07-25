@@ -31,25 +31,21 @@ void main() {
   runApp(const App());
 }
 
-class Injection extends StatefulWidget {
+class Injection extends StatelessWidget {
   final Widget child;
 
   const Injection({super.key, required this.child});
 
   @override
-  State<Injection> createState() => _InjectionState();
-}
-
-class _InjectionState extends State<Injection> {
-  final counterController = CounterController();
-
-  @override
   Widget build(BuildContext context) {
-    return Provider<CountryNotifier>(
-      value: CountryNotifier(),
+    final counterNotifier = CounterController();
+    final countryNotifier = CountryNotifier();
+
+    return Provider(
+      value: countryNotifier,
       child: Provider(
-        value: counterController,
-        child: widget.child,
+        value: counterNotifier,
+        child: child,
       ),
     );
   }
@@ -95,14 +91,15 @@ class Home extends StatelessWidget {
                   ],
                 ),
                 Consumer<CountryNotifier>(
-                  builder: (_, countryNotifier, child) =>
-                      Text(countryNotifier.country),
+                  builder: (context, countryNotifier) {
+                    return Text(countryNotifier.country);
+                  },
                 ),
                 Text(countryNotifier.country),
               ],
             ),
             Consumer<CounterController>(
-              builder: (context, counterNotifier, child) {
+              builder: (context, counterNotifier) {
                 return Text('You pressed the button ${counterNotifier.count}');
               },
             ),

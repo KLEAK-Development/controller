@@ -11,15 +11,38 @@ class Provider<T> extends InheritedWidget {
   }
 }
 
+typedef ConsumerBuilder<T> = Widget Function(
+  BuildContext context,
+  T notifier,
+);
+
 class Consumer<T extends Listenable> extends StatelessWidget {
-  final Widget Function(
-    BuildContext context,
-    T notifier,
-    Widget? child,
-  ) builder;
+  final ConsumerBuilder<T> builder;
+
+  const Consumer({super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    final notifier = context.read<T>();
+
+    return ListenableBuilder(
+      listenable: notifier,
+      builder: (context, child) => builder(context, notifier),
+    );
+  }
+}
+
+typedef ConsumerWithChildBuilder<T> = Widget Function(
+  BuildContext context,
+  T notifier,
+  Widget? child,
+);
+
+class ConsumerWithChild<T extends Listenable> extends StatelessWidget {
+  final ConsumerWithChildBuilder<T> builder;
   final Widget? child;
 
-  const Consumer({super.key, required this.builder, this.child});
+  const ConsumerWithChild({super.key, required this.builder, this.child});
 
   @override
   Widget build(BuildContext context) {
