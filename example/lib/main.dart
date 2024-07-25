@@ -1,7 +1,7 @@
 import 'package:controller/controller.dart';
 import 'package:flutter/material.dart';
 
-class CounterController extends Controller {
+class CounterController extends ChangeNotifier {
   int _count;
 
   CounterController({final int initialValue = 0}) : _count = initialValue;
@@ -14,12 +14,17 @@ class CounterController extends Controller {
   }
 }
 
-class CountryController extends Controller {
+class CountryNotifier extends ChangeNotifier {
   String _country;
 
-  CountryController({final String country = 'France'}) : _country = country;
+  CountryNotifier({final String country = 'France'}) : _country = country;
 
   String get country => _country;
+
+  set country(String value) {
+    _country = value;
+    notifyListeners();
+  }
 }
 
 void main() {
@@ -40,10 +45,10 @@ class _InjectionState extends State<Injection> {
 
   @override
   Widget build(BuildContext context) {
-    return Provider<String>(
-      value: 'France',
-      child: ControllerProvider(
-        controller: counterController,
+    return Provider<CountryNotifier>(
+      value: CountryNotifier(),
+      child: Provider(
+        value: counterController,
         child: widget.child,
       ),
     );
@@ -68,18 +73,37 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final country = context.read<String>();
+    final countryNotifier = context.read<CountryNotifier>();
 
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(country),
-            ControllerListenable<CounterController>(
-              builder: (context, counterController) {
-                return Text(
-                    'You pressed the button ${counterController.count}');
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownMenu(
+                  initialSelection: 'France',
+                  onSelected: (selectedValue) {
+                    final countryNotifier = context.read<CountryNotifier>();
+                    countryNotifier.country = selectedValue ?? 'France';
+                  },
+                  dropdownMenuEntries: const [
+                    DropdownMenuEntry(value: 'France', label: 'France'),
+                    DropdownMenuEntry(value: 'Germany', label: 'Germany'),
+                  ],
+                ),
+                Consumer<CountryNotifier>(
+                  builder: (_, countryNotifier, child) =>
+                      Text(countryNotifier.country),
+                ),
+                Text(countryNotifier.country),
+              ],
+            ),
+            Consumer<CounterController>(
+              builder: (context, counterNotifier, child) {
+                return Text('You pressed the button ${counterNotifier.count}');
               },
             ),
           ],
@@ -88,7 +112,7 @@ class Home extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          final counterController = context.ofType<CounterController>();
+          final counterController = context.read<CounterController>();
           counterController.increment();
         },
       ),
